@@ -1,11 +1,11 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import NewGame from "../NewGame";
-import fetchFactions from "../API/fetchFactions";
-import registerUser from "../API/registerUser";
-import { UserContext } from "../Contexts/UserContext";
+import NewGame from "@/Components/NewGame";
+import fetchFactions from "@/API/fetchFactions";
+import registerUser from "@/API/registerUser";
+import { UserContext } from "@/Contexts/UserContext";
 import toast from "react-hot-toast";
-import { IFaction } from "../Types/types";
+import { IFaction } from "@/Types/types";
 import '@testing-library/jest-dom';
 
 vi.mock("../API/fetchFactions");
@@ -66,7 +66,7 @@ describe("NewGame component", () => {
         fireEvent.submit(screen.getByRole("button", { name: /Register/i }));
 
         expect(
-            screen.getByText(/Please enter a Symbol name for your character/i)
+            screen.getByText(/Please enter a name for your character/i)
         ).toBeInTheDocument();
     });
 });

@@ -1,21 +1,17 @@
 import { createContext, useState } from "react";
 import { ReactNode } from "react";
-
-interface IUser {
-  symbol?: String;
-  token?: String;
-}
+import { IUser } from "@/Types/types";
 
 export const UserContext = createContext<{
-  user: IUser;
-  setUser: React.Dispatch<React.SetStateAction<IUser>>;
+  user: IUser | null;
+  setUser: React.Dispatch<React.SetStateAction<IUser | null>>;
 }>({
-  user: {},
+  user: null,
   setUser: () => {},
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<IUser>({});
+    const [user, setUser] = useState<IUser | null>(null);
 
     return (
         <UserContext.Provider value={{ user, setUser }}>
