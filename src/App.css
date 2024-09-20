@@ -19,7 +19,26 @@
   flex-direction: column;
 }
 
+.center-content {
+  display: grid;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+}
+
+.page-display {
+  display: grid;
+  justify-content: center;
+  width: 100vw;
+  padding-top: 20px;
+}
+
 .agent-list {
   min-width: 80vw;
   max-width: 800px;
+}
+
+div.contract-card {
+  width: 70vw;
+  padding: 0px !important;
 }

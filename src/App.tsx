@@ -8,7 +8,13 @@ import { Navigation } from "@/Components/NavBar";
 import { Route, Routes } from "react-router-dom";
 import { ListAgents } from "@/Components/ListAgents";
 import ShipNavigation from "@/Components/ShipNavigation";
-import Contracts from "@/Components/Contracts";
+import Contracts from "@/Pages/Contracts";
+
+import TimeAgo from 'javascript-time-ago'
+
+import en from 'javascript-time-ago/locale/en'
+
+TimeAgo.addDefaultLocale(en)
 
 function App() {
   const { user } = useContext(UserContext);
@@ -16,13 +22,15 @@ function App() {
   return (
     <>
       <Navigation />
+      <div className="page-display">
       <Routes>
         <Route path="/" element=<NewGame /> />
         <Route path="/agents" element=<ListAgents /> />
         {user && <Route path="/navigation" element=<ShipNavigation /> />}
         {user && <Route path="/contracts" element=<Contracts /> />}
       </Routes>
-      <Toaster />
+      </div>
+      <Toaster position="bottom-center"/>
     </>
   );
 }
