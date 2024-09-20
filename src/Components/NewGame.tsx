@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useState } from "react"
-import fetchFactions from "./API/fetchFactions"
+import fetchFactions from "@/API/fetchFactions"
 import { Button, Form, Row, Col } from "react-bootstrap";
-import { UserContext } from "./Contexts/UserContext";
-import { IFaction } from "./Types/types";
-import registerUser from "./API/registerUser";
+import { UserContext } from "@/Contexts/UserContext";
+import { IFaction, IUser } from "@/Types/types";
+import registerUser from "@/API/registerUser";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
+import { addUserToStorage } from "@/utils/addUserToStorage"
+import { getUsersFromStorage } from "../utils/getUsersFromStorage";
 
 function NewGame() {
   const [factions, setFactions] = useState<IFaction[] | null>(null);
@@ -28,7 +30,7 @@ function NewGame() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (newUser.symbol.length < 5) {
+    if (newUser.symbol.length < 5 || newUser.symbol.length > 14) {
       setSymbolValidation(true);
       return;
     }
@@ -45,7 +47,18 @@ function NewGame() {
         toast.error("Oops, something went wrong!");
       }
     } else {
-      setUser(() => result.data);
+      const { symbol, accountId } = result.data.data.agent;
+      const factionName = result.data.data.faction.name;
+
+
+      const token = result.data.data.token;
+      console.log(factionName);
+
+      setUser(() => {
+        return { symbol, accountId, token, factionName }
+      });
+      addUserToStorage({ symbol, accountId, token, factionName } as IUser);
+      console.log(getUsersFromStorage());
       toast.success("Agent created!")
     }
 
@@ -74,7 +87,7 @@ function NewGame() {
                 aria-label="Username" type="text"
                 placeholder="Username" />
               {symbolValidation && (<Form.Control.Feedback type="invalid">
-                Please enter a Symbol name for your character
+                Please enter a name for your character
               </Form.Control.Feedback>)}
             </Col>
           </Form.Group>

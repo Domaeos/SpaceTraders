@@ -1,11 +1,25 @@
+* {
+  box-sizing: border-box;
+}
+
 #root {
-  max-width: 1280px;
+  width: 100vw;
+  height: 100vh;
   margin: 0 auto;
-  padding: 2rem;
+  color: aliceblue;
 }
 
-blockquote {
-  background-color: aquamarine;
-  font-weight: 600;
+.nav-brand {
+  color: azure;
 }
 
+.nav-user-info {
+  display: grid;
+  text-align: right;
+  flex-direction: column;
+}
+
+.agent-list {
+  min-width: 80vw;
+  max-width: 800px;
+}
