@@ -1,42 +1,113 @@
-import { useState } from "react"
-
-/**
- * This component is a basic MVP of part one of the quickstart. It handles registering your agent and receives a token
- * which you will need to use in subsequent calls. Therefore, you might want to refactor or replace this as you move forward.
- */
+import React, { useContext, useEffect, useState } from "react"
+import fetchFactions from "./API/fetchFactions"
+import { Button, Form, Row, Col } from "react-bootstrap";
+import { UserContext } from "./Contexts/UserContext";
+import { IFaction } from "./Types/types";
+import registerUser from "./API/registerUser";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 
 function NewGame() {
-  const [token, setToken] = useState();
-  const [resp, setResp] = useState("");
-  const [form, setForm] = useState({ symbol: "", faction: "COSMIC" });
+  const [factions, setFactions] = useState<IFaction[] | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [newUser, setNewUser] = useState({
+    symbol: "",
+    faction: "COSMIC",
+  });
+  const [symbolValidation, setSymbolValidation] = useState(false);
+  const { setUser } = useContext(UserContext);
 
-  return (<>
-    <h1>New Game</h1>
-    <input name="symbol" value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.currentTarget.value })} />
-    <input name="faction" value={form.faction} onChange={(e) => setForm({ ...form, faction: e.currentTarget.value })} />
-    <input type="submit" onClick={async () => {
-      const resp = await fetch("https://api.spacetraders.io/v2/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          symbol: form.symbol,
-          faction: form.faction,
-        }),
-      });
+  useEffect(() => {
 
-      const json = await resp.json();
+    (async () => {
+      const factions = await fetchFactions();
+      setFactions(factions!.data.data);
+    })();
 
-      if (resp.ok) {
-        setToken(json.data.token)
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (newUser.symbol.length < 5) {
+      setSymbolValidation(true);
+      return;
+    }
+    setSubmitting(true);
+
+    const loadingToast = toast.loading("Registering new user..");
+    const result = await registerUser(newUser);
+    toast.dismiss(loadingToast)
+
+    if (result instanceof AxiosError) {
+      if (result.status === 409) {
+        toast.error("Agent name is taken");
+      } else {
+        toast.error("Oops, something went wrong!");
       }
+    } else {
+      setUser(() => result.data);
+      toast.success("Agent created!")
+    }
 
-      setResp(JSON.stringify(json, null, 2))
-    }} />
-    <pre>API token: {token}</pre>
-    <pre>Response: {resp}</pre>
-  </>)
+    setSubmitting(false);
+  }
+
+  return (
+    <>
+      <Form onSubmit={handleSubmit}>
+        <fieldset disabled={submitting}>
+
+          <Form.Group as={Row} className="mb-3" controlId="formUsername">
+            <Form.Label column sm={2}>
+              Symbol
+            </Form.Label>
+            <Col>
+              <Form.Control
+                value={newUser.symbol}
+                isInvalid={symbolValidation}
+                onFocus={() => { setSymbolValidation(false) }}
+                onChange={(e) => {
+                  setNewUser(user => {
+                    return { ...user, symbol: e.target.value }
+                  });
+                }}
+                aria-label="Username" type="text"
+                placeholder="Username" />
+              {symbolValidation && (<Form.Control.Feedback type="invalid">
+                Please enter a Symbol name for your character
+              </Form.Control.Feedback>)}
+            </Col>
+          </Form.Group>
+
+          <Form.Group as={Row} className="mb-3" controlId="formFaction">
+            <Form.Label column sm={2}>
+              Faction
+            </Form.Label>
+            <Col sm={10}>
+              <Form.Select
+                value={newUser.faction}
+                onChange={(e) => {
+                  setNewUser(user => {
+                    return { ...user, faction: e.target.value }
+                  });
+                }}
+                aria-label="Choose a faction">
+                {factions && factions.map((faction) => {
+                  return (<option key={faction.symbol} value={faction.symbol}>{faction.name}</option>)
+                })}
+              </Form.Select>
+            </Col>
+          </Form.Group>
+
+          <Form.Group as={Row} className="mb-3">
+            <Button type="submit">Register</Button>
+          </Form.Group>
+        </fieldset>
+
+      </Form >
+    </>
+  )
+
 }
 
-export default NewGame
+export default NewGame;
