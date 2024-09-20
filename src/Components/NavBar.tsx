@@ -13,7 +13,10 @@ export function Navigation() {
           <h1 className="nav-brand">STQS</h1>
         </Navbar.Brand>
         <Navbar.Toggle />
+
         <Nav.Link as={Link} to="/agents">Agents</Nav.Link>
+        <Nav.Link as={Link} to="/contracts">Contracts</Nav.Link>
+
         <Navbar.Collapse className="justify-content-end">
           {user && <NavDropdown title={user?.symbol} className="nav-user-info">
               <NavDropdown.Item href="#action/3.2">

@@ -16,3 +16,19 @@ export interface IUser {
   token: string;
   factionName: string;
 }
+
+export interface IContract {
+  id: string;
+  factionSymbol: string;
+  type: string;
+  accepted: boolean;
+  deadlineToAccept: string;
+  expiration: string;
+  fulfilled: boolean;
+  terms: {
+    payment: {
+      onAccepted: number;
+      onFulfilled: number;
+    }
+  }
+}

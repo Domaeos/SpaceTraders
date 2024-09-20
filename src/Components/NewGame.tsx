@@ -7,7 +7,7 @@ import registerUser from "@/API/registerUser";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import { addUserToStorage } from "@/utils/addUserToStorage"
-import { getUsersFromStorage } from "../utils/getUsersFromStorage";
+import axiosClient from "@/API/client";
 
 function NewGame() {
   const [factions, setFactions] = useState<IFaction[] | null>(null);
@@ -49,16 +49,15 @@ function NewGame() {
     } else {
       const { symbol, accountId } = result.data.data.agent;
       const factionName = result.data.data.faction.name;
-
-
       const token = result.data.data.token;
-      console.log(factionName);
 
       setUser(() => {
         return { symbol, accountId, token, factionName }
       });
+
       addUserToStorage({ symbol, accountId, token, factionName } as IUser);
-      console.log(getUsersFromStorage());
+      axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
       toast.success("Agent created!")
     }
 

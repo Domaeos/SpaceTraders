@@ -2,9 +2,10 @@ import { useContext, useEffect, useState } from 'react';
 import Badge from 'react-bootstrap/Badge';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { IUser } from '../Types/types';
-import getUsersFromStorage from '@/utils/getUsersFromStorage';
+import { getUsersFromStorage } from '@/utils/getUsersFromStorage';
 import { UserContext } from '@/Contexts/UserContext';
 import { logInDev } from '@/utils/logInDev';
+import axiosClient from '@/API/client';
 
 export function ListAgents() {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -17,6 +18,9 @@ export function ListAgents() {
   function handleChangeUser(userToSwapTo: IUser) {
     logInDev("Changing to: " + userToSwapTo.symbol);
     setUser(userToSwapTo);
+
+    axiosClient.defaults.headers.common['Authorization'] = `Bearer ${userToSwapTo.token}`;
+
   }
 
   if (users.length === 0) return <></>;
