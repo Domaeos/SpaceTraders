@@ -18,7 +18,8 @@ export function ListAgents() {
   }, [user]);
 
   function handleChangeUser(userToSwapTo: IUser) {
-    logInDev("Changing to: " + userToSwapTo.symbol);
+    logInDev("Changing to:");
+    logInDev(userToSwapTo);
     logInDev("Token: " + userToSwapTo.token);
     setUser(userToSwapTo);
     setCurrentUserInStorage(userToSwapTo);

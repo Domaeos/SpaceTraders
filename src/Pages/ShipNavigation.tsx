@@ -1,10 +1,10 @@
-import fetchWaypoints from "@/API/fetchWaypoints";
+import fetchAllWaypoints from "@/API/fetchAllWaypoints";
 import getHQCoords from "@/API/getHQCoords";
 import WaypointCard from "@/Components/WaypointCard";
 import WaypointModal from "@/Components/WaypointModal";
 import WaypointPlaceholder from "@/Components/WaypointPlaceholder";
 import { IWayPoint } from "@/Types/types";
-import { logInDev } from "@/utils/logInDev";
+import getSystem from "@/utils/getSystem";
 import { useEffect, useState } from "react";
 import { Tabs, Tab } from "react-bootstrap";
 
@@ -17,13 +17,10 @@ export default function ShipNavigation() {
 
   const [showModal, setShowModal] = useState(false);
 
-  const systemRegex = /^[^-]+-[^-]+(?=-)/;
-
   useEffect(() => {
     (async () => {
-      const coords = await getHQCoords();
-      const [system] = coords.match(systemRegex);
-      logInDev(system);
+      const symbol = await getHQCoords();
+      const system = getSystem(symbol);
       setCurrentSystem(system);
     })();
   }, []);
@@ -32,12 +29,12 @@ export default function ShipNavigation() {
   useEffect(() => {
     setIsLoading(true);
     (async () => {
-      if (currentSystem) {
-        const systemWaypoints = await fetchWaypoints(currentSystem, activeTab);
-        if (systemWaypoints?.length) {
-          setWaypoints(systemWaypoints)
-        };
-      }
+        if (currentSystem) {
+          const systemWaypoints = await fetchAllWaypoints(currentSystem, activeTab);
+          if (systemWaypoints?.length) {
+            setWaypoints(systemWaypoints)
+          };
+        }
       setIsLoading(false);
     })();
   }, [currentSystem, activeTab])
@@ -58,11 +55,10 @@ export default function ShipNavigation() {
       </Tabs>
       <div className="waypoints-grid">
         {!isLoading && waypoints.map((waypoint) => (
-          <WaypointCard waypoint={waypoint} setCurrentWaypoint={setCurrentWaypoint} setShowModal={setShowModal} />
+          <WaypointCard key={waypoint.symbol} waypoint={waypoint} setCurrentWaypoint={setCurrentWaypoint} setShowModal={setShowModal} />
         ))}
-        {isLoading && <WaypointPlaceholder amount={10}/>}
+        {isLoading && <WaypointPlaceholder amount={10} />}
       </div>
-      <WaypointModal system={currentSystem} show={showModal} setShow={setShowModal} waypoint={currentWaypoint}/>
     </>
   )
 }

@@ -1,5 +1,7 @@
-import fetchShips from '@/API/fetchShips';
-import { IWayPoint } from '@/Types/types';
+
+import fetchShipyard from '@/API/fetchShipyard';
+import purchaseShip from '@/API/purchaseShip';
+import { IShipyard, IWayPoint } from '@/Types/types';
 import formatString from '@/utils/formatString';
 import { logInDev } from '@/utils/logInDev';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
@@ -7,23 +9,33 @@ import { Button, ListGroup } from 'react-bootstrap';
 // import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-function WaypointModal({ system, show, setShow, waypoint }:
-  { system: string, show: boolean, waypoint: IWayPoint | null, setShow: Dispatch<SetStateAction<boolean>> }) {
-  const [ships, setShips] = useState<any[]>([]);
+function WaypointModal({ system, show, setShow, waypoint, setRefresh }:
+  {
+    system: string,
+    show: boolean,
+    waypoint: IWayPoint | null,
+    setShow: Dispatch<SetStateAction<boolean>>,
+    setRefresh: Dispatch<SetStateAction<boolean>>
+  }) {
+  const [ships, setShips] = useState<IShipyard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     logInDev(waypoint);
     (async () => {
-      const ships = await fetchShips(system, waypoint?.symbol || "");
+      const ships = await fetchShipyard(system, waypoint?.symbol || "");
       logInDev(ships);
       setShips(ships);
       setIsLoading(false);
     })();
   }, [waypoint]);
 
-  function handlePurchase(type: string) {
-
+  async function handlePurchase(type: string) {
+    const purchase = await purchaseShip(type, ships!.symbol);
+    if (purchase) {
+      setShow(false);
+      setRefresh(x => !x);
+    }
   }
 
   if (isLoading) {
