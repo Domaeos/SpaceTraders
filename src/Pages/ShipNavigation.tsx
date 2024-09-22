@@ -1,7 +1,6 @@
 import fetchAllWaypoints from "@/API/fetchAllWaypoints";
 import getHQCoords from "@/API/getHQCoords";
 import WaypointCard from "@/Components/WaypointCard";
-import WaypointModal from "@/Components/WaypointModal";
 import WaypointPlaceholder from "@/Components/WaypointPlaceholder";
 import { IWayPoint } from "@/Types/types";
 import getSystem from "@/utils/getSystem";
@@ -10,12 +9,9 @@ import { Tabs, Tab } from "react-bootstrap";
 
 export default function ShipNavigation() {
   const [waypoints, setWaypoints] = useState<IWayPoint[]>([]);
-  const [currentWaypoint, setCurrentWaypoint] = useState<IWayPoint | null>(null);
   const [isLoading, setIsLoading] = useState(true)
   const [currentSystem, setCurrentSystem] = useState("");
   const [activeTab, setActiveTab] = useState('ALL');
-
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -55,7 +51,7 @@ export default function ShipNavigation() {
       </Tabs>
       <div className="waypoints-grid">
         {!isLoading && waypoints.map((waypoint) => (
-          <WaypointCard key={waypoint.symbol} waypoint={waypoint} setCurrentWaypoint={setCurrentWaypoint} setShowModal={setShowModal} />
+          <WaypointCard key={waypoint.symbol} waypoint={waypoint} />
         ))}
         {isLoading && <WaypointPlaceholder amount={10} />}
       </div>

@@ -6,7 +6,7 @@ import { logInDev } from "@/utils/logInDev";
 import { useEffect, useState } from "react"
 import { Accordion, Badge, Button, ButtonGroup } from "react-bootstrap";
 import formatString from '@/utils/formatString';
-import WaypointModal from "@/Components/WaypointModal";
+import WaypointModal from "@/Components/ShipyardModal";
 
 export default function Ships() {
   const [isLoading, setIsLoading] = useState(true);

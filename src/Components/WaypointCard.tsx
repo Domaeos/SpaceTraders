@@ -1,9 +1,8 @@
 import { IWayPoint } from "@/Types/types";
-import { Dispatch, SetStateAction } from "react";
 import { Card, Button, Badge } from "react-bootstrap";
 
-export default function WaypointCard({ waypoint, setShowModal, setCurrentWaypoint }
-  : { waypoint: IWayPoint, setCurrentWaypoint: Dispatch<SetStateAction<IWayPoint | null>>, setShowModal: Dispatch<SetStateAction<boolean>> }) {
+export default function WaypointCard({ waypoint }
+  : { waypoint: IWayPoint }) {
 
   return (
     <Card>
@@ -11,11 +10,7 @@ export default function WaypointCard({ waypoint, setShowModal, setCurrentWaypoin
       <Card.Body>
         <Card.Title>{waypoint.type}</Card.Title>
         <Button variant={waypoint.type !== "ORBITAL_STATION" ? "secondary" : "primary"}
-          disabled={true}
-          onClick={() => {
-            setShowModal(true)
-            setCurrentWaypoint(waypoint)
-          }}>{waypoint.type !== "ORBITAL_STATION" ? "View details" : "View ships" }</Button>
+          disabled={true}>{waypoint.type !== "ORBITAL_STATION" ? "View details" : "View ships" }</Button>
       </Card.Body>
       <Card.Footer>
         {waypoint.traits.length &&
