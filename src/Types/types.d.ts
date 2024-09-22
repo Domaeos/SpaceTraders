@@ -53,3 +53,77 @@ export interface IWayPoint {
     faction: IFaction;
     isUnderConstruction: boolean;
 }
+
+export interface IShipyard {
+  modificationFee: number;
+  symbol: string;
+  shipTypes: string[];
+}
+
+export interface IShip {
+  symbol: string;
+  registration: {
+    name: string;
+    factionSymbol: string;
+    role: string;
+  };
+  nav: {
+    systemSymbol: string;
+    waypointSymbol: string;
+    status: string;
+    type: string;
+  };
+  crew: {
+    current: number;
+    capacity: number;
+    required: number;
+  };
+  fuel: {
+    current: number;
+    capacity: number;
+    consumed: {
+      amount: number;
+      timestamp: string;
+    };
+  };
+  frame: {
+    symbol: string;
+    name: string;
+    description: string;
+  };
+  reactor: {
+    symbol: string;
+    name: string;
+    description: string;
+  };
+  engine: {
+    symbol: string;
+    name: string;
+    description: string;
+  };
+  modules: {
+    symbol: string;
+    name: string;
+    description: string;
+  }[];
+  mounts: {
+    symbol: string;
+    name: string;
+    description: string;
+  }[];
+  cargo: {
+    capacity: number;
+    units: number;
+    inventory: {
+      symbol: string;
+      name: string;
+      description: string;
+      units: number;
+    }[];
+  };
+  cooldown: {
+    shipSymbol: string;
+    totalSeconds: number;
+    remainingSeconds: number;
+  };
+}

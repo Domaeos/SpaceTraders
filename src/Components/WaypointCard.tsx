@@ -6,12 +6,12 @@ export default function WaypointCard({ waypoint, setShowModal, setCurrentWaypoin
   : { waypoint: IWayPoint, setCurrentWaypoint: Dispatch<SetStateAction<IWayPoint | null>>, setShowModal: Dispatch<SetStateAction<boolean>> }) {
 
   return (
-    <Card key={waypoint.symbol}>
+    <Card>
       <Card.Header>{waypoint.symbol}</Card.Header>
       <Card.Body>
         <Card.Title>{waypoint.type}</Card.Title>
         <Button variant={waypoint.type !== "ORBITAL_STATION" ? "secondary" : "primary"}
-          disabled={waypoint.type !== "ORBITAL_STATION"}
+          disabled={true}
           onClick={() => {
             setShowModal(true)
             setCurrentWaypoint(waypoint)
