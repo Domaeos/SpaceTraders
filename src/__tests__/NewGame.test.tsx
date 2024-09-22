@@ -1,11 +1,11 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import NewGame from "@/Components/NewGame";
 import fetchFactions from "@/API/fetchFactions";
 import registerUser from "@/API/registerUser";
 import { UserContext } from "@/Contexts/UserContext";
 import toast from "react-hot-toast";
-import { IFaction } from "@/Types/types";
+import { IFaction, IUser } from "@/Types/types";
 import '@testing-library/jest-dom';
 
 vi.mock("../API/fetchFactions");
@@ -37,7 +37,7 @@ describe("NewGame component", () => {
 
     it("renders the form and fetches factions", async () => {
         render(
-            <UserContext.Provider value={{ user: {}, setUser: mockSetUser }}>
+            <UserContext.Provider value={{ user: {} as IUser, setUser: mockSetUser }}>
                 <NewGame />
             </UserContext.Provider>
         );
@@ -55,15 +55,17 @@ describe("NewGame component", () => {
 
     it("validates symbol length and prevents form submission", async () => {
         render(
-            <UserContext.Provider value={{ user: {}, setUser: mockSetUser }}>
+            <UserContext.Provider value={{ user: {} as IUser, setUser: mockSetUser }}>
                 <NewGame />
             </UserContext.Provider>
         );
 
-        fireEvent.change(screen.getByLabelText(/Symbol/i), {
-            target: { value: "Abc" },
-        });
-        fireEvent.submit(screen.getByRole("button", { name: /Register/i }));
+        act(() => {
+            fireEvent.change(screen.getByLabelText(/Symbol/i), {
+                target: { value: "Abc" },
+            });
+            fireEvent.submit(screen.getByRole("button", { name: /Register/i }));
+        })
 
         expect(
             screen.getByText(/Please enter a name for your character/i)
