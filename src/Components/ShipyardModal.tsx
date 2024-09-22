@@ -6,10 +6,9 @@ import formatString from '@/utils/formatString';
 import { logInDev } from '@/utils/logInDev';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Button, ListGroup } from 'react-bootstrap';
-// import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-function WaypointModal({ system, show, setShow, waypoint, setRefresh }:
+export default function ShipyardModal({ system, show, setShow, waypoint, setRefresh }:
   {
     system: string,
     show: boolean,
@@ -64,5 +63,3 @@ function WaypointModal({ system, show, setShow, waypoint, setRefresh }:
     </>
   );
 }
-
-export default WaypointModal;
