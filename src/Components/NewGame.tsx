@@ -9,6 +9,7 @@ import { AxiosError } from "axios";
 import { addUserToStorage } from "@/utils/addUserToStorage"
 import axiosClient from "@/API/client";
 import { logInDev } from "@/utils/logInDev";
+import setCurrentUserInStorage from "@/utils/setCurrentUserInStorage";
 
 function NewGame() {
   const [factions, setFactions] = useState<IFaction[] | null>(null);
@@ -65,6 +66,7 @@ function NewGame() {
       });
 
       addUserToStorage({ symbol, accountId, token, factionName } as IUser);
+      setCurrentUserInStorage({symbol, accountId, token, factionName } as IUser);
       axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
       toast.success("Agent created!")
@@ -99,7 +101,7 @@ function NewGame() {
                 aria-label="Username" type="text"
                 placeholder="Username" />
               {symbolValidation && (<Form.Control.Feedback type="invalid">
-                Please enter a name for your character
+                Please enter a name for your character between 5 and 14 characters
               </Form.Control.Feedback>)}
             </Col>
           </Form.Group>

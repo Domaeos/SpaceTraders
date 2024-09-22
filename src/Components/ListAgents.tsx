@@ -7,6 +7,7 @@ import { UserContext } from '@/Contexts/UserContext';
 import { logInDev } from '@/utils/logInDev';
 import axiosClient from '@/API/client';
 import NewGame from './NewGame';
+import setCurrentUserInStorage from '../utils/setCurrentUserInStorage';
 
 export function ListAgents() {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -20,6 +21,7 @@ export function ListAgents() {
     logInDev("Changing to: " + userToSwapTo.symbol);
     logInDev("Token: " + userToSwapTo.token);
     setUser(userToSwapTo);
+    setCurrentUserInStorage(userToSwapTo);
 
     axiosClient.defaults.headers.common['Authorization'] = `Bearer ${userToSwapTo.token}`;
     logInDev(axiosClient.defaults.headers.common['Authorization']);
@@ -48,8 +50,8 @@ export function ListAgents() {
             </div>
 
             {user && agent.token === user.token &&
-              <Badge bg="primary" pill>
-                Tick
+              <Badge bg="success" pill>
+                Current
               </Badge>
             }
           </ListGroup.Item>

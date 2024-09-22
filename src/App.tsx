@@ -2,7 +2,7 @@ import "@/App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NewGame from "@/Components/NewGame";
 import { UserContext } from "@/Contexts/UserContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { Navigation } from "@/Components/NavBar";
 import { Route, Routes } from "react-router-dom";
@@ -13,11 +13,15 @@ import Contracts from "@/Pages/Contracts";
 import TimeAgo from 'javascript-time-ago'
 
 import en from 'javascript-time-ago/locale/en'
+import getCurrentUserFromStorage from "./utils/getCurrentUserFromStorage";
 
 TimeAgo.addDefaultLocale(en)
 
 function App() {
-  const { user } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
+  useEffect(() =>{
+    setUser(getCurrentUserFromStorage() || null);
+  }, [])
 
   return (
     <>
