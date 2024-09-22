@@ -15,6 +15,7 @@ export interface IUser {
   symbol: string;
   token: string;
   factionName: string;
+  location?: string;
 }
 
 export interface IContract {
@@ -31,4 +32,24 @@ export interface IContract {
       onFulfilled: number;
     }
   }
+}
+
+export interface ITrait {
+  symbol: string;
+  name: string;
+  description: string;
+}
+
+export interface IWayPoint {
+    systemSymbol: string;
+    symbol: string;
+    type: string;
+    x: number;
+    y: number;
+    orbitals: any[];
+    traits: ITrait[];
+    modifiers: any[];
+    chart: IChart;
+    faction: IFaction;
+    isUnderConstruction: boolean;
 }

@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import { addUserToStorage } from "@/utils/addUserToStorage"
 import axiosClient from "@/API/client";
+import { logInDev } from "@/utils/logInDev";
 
 function NewGame() {
   const [factions, setFactions] = useState<IFaction[] | null>(null);
@@ -40,16 +41,24 @@ function NewGame() {
     const result = await registerUser(newUser);
     toast.dismiss(loadingToast)
 
+    logInDev(result);
+
     if (result instanceof AxiosError) {
+
       if (result.status === 409) {
+        logInDev(newUser);
         toast.error("Agent name is taken");
       } else {
         toast.error("Oops, something went wrong!");
       }
+
     } else {
+
       const { symbol, accountId } = result.data.data.agent;
       const factionName = result.data.data.faction.name;
       const token = result.data.data.token;
+
+      logInDev(result.data.data);
 
       setUser(() => {
         return { symbol, accountId, token, factionName }
@@ -59,6 +68,10 @@ function NewGame() {
       axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
       toast.success("Agent created!")
+      setNewUser({
+        symbol: "",
+        faction: "COSMIC"
+      })
     }
 
     setSubmitting(false);
@@ -79,8 +92,8 @@ function NewGame() {
                 isInvalid={symbolValidation}
                 onFocus={() => { setSymbolValidation(false) }}
                 onChange={(e) => {
-                  setNewUser(user => {
-                    return { ...user, symbol: e.target.value }
+                  setNewUser(x => {
+                    return { ...x, symbol: e.target.value }
                   });
                 }}
                 aria-label="Username" type="text"
@@ -99,8 +112,8 @@ function NewGame() {
               <Form.Select
                 value={newUser.faction}
                 onChange={(e) => {
-                  setNewUser(user => {
-                    return { ...user, faction: e.target.value }
+                  setNewUser(x => {
+                    return { ...x, faction: e.target.value }
                   });
                 }}
                 aria-label="Choose a faction">

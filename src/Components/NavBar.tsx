@@ -16,6 +16,7 @@ export function Navigation() {
 
         <Nav.Link as={Link} to="/agents">Agents</Nav.Link>
         <Nav.Link as={Link} to="/contracts">Contracts</Nav.Link>
+        <Nav.Link as={Link} to="/navigation">Navigation</Nav.Link>
 
         <Navbar.Collapse className="justify-content-end">
           {user && <NavDropdown title={user?.symbol} className="nav-user-info">

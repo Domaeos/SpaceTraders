@@ -7,7 +7,7 @@ import { Toaster } from "react-hot-toast";
 import { Navigation } from "@/Components/NavBar";
 import { Route, Routes } from "react-router-dom";
 import { ListAgents } from "@/Components/ListAgents";
-import ShipNavigation from "@/Components/ShipNavigation";
+import ShipNavigation from "@/Pages/ShipNavigation";
 import Contracts from "@/Pages/Contracts";
 
 import TimeAgo from 'javascript-time-ago'

@@ -6,6 +6,7 @@ import { getUsersFromStorage } from '@/utils/getUsersFromStorage';
 import { UserContext } from '@/Contexts/UserContext';
 import { logInDev } from '@/utils/logInDev';
 import axiosClient from '@/API/client';
+import NewGame from './NewGame';
 
 export function ListAgents() {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -17,9 +18,11 @@ export function ListAgents() {
 
   function handleChangeUser(userToSwapTo: IUser) {
     logInDev("Changing to: " + userToSwapTo.symbol);
+    logInDev("Token: " + userToSwapTo.token);
     setUser(userToSwapTo);
 
     axiosClient.defaults.headers.common['Authorization'] = `Bearer ${userToSwapTo.token}`;
+    logInDev(axiosClient.defaults.headers.common['Authorization']);
 
   }
 
@@ -35,7 +38,6 @@ export function ListAgents() {
             action
             className="d-flex justify-content-between align-items-start"
             disabled={user && agent.token === user.token || false}
-            // variant={user && agent.token === user.token ? "dark" : "light"}
             onClick={() => handleChangeUser(agent)}
             key={agent.accountId}
           >
@@ -53,6 +55,7 @@ export function ListAgents() {
           </ListGroup.Item>
         ))}
       </ListGroup>
+      <NewGame />
     </>
   )
 }
