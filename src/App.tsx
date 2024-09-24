@@ -27,7 +27,7 @@ function App() {
 
   useEffect(() => {
     const storedUser = getCurrentUserFromStorage();
-    if (storedUser) {
+    if (storedUser?.token) {
       setUser(storedUser);
       axiosClient.defaults.headers.common['Authorization'] = `Bearer ${storedUser.token}`;
     }
@@ -36,7 +36,7 @@ function App() {
   useMemo(() => {
 
     (async () => {
-      if (user) {
+      if (user?.token) {
         const contracts = await fetchContracts();
         logInDev("AppUseEffect");
         logInDev(contracts);
