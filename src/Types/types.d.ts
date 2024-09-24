@@ -10,6 +10,14 @@ export interface IRegisterUser {
   faction: string;
 }
 
+
+export interface IModalSystem {
+  waypoint: string;
+  shipSymbol: string;
+  type: ModalActions;
+  cargo: ICargo;
+}
+
 export interface IUser {
   accountId: string;
   symbol: string;
@@ -49,6 +57,17 @@ export interface ITrait {
   symbol: string;
   name: string;
   description: string;
+}
+
+export interface ICargo {
+  capacity: number;
+  units: number;
+  inventory: {
+    symbol: string;
+    name: string;
+    description: string;
+    units: number;
+  }[];
 }
 
 export interface IWayPoint {
@@ -127,20 +146,40 @@ export interface IShip {
     name: string;
     description: string;
   }[];
-  cargo: {
-    capacity: number;
-    units: number;
-    inventory: {
-      symbol: string;
-      name: string;
-      description: string;
-      units: number;
-    }[];
-  };
+  cargo: ICargo;
   cooldown: {
     shipSymbol: string;
     totalSeconds: number;
     remainingSeconds: number;
     expiration?: string;
   };
+}
+
+export interface ITradeGood {
+  symbol: string;
+  tradeVolume: number;
+  type: string;
+  activity: string;
+  purchasePrice: number;
+  sellPrice: number;
+  supply: string;
+}
+
+export interface IExchange {
+  symbol: string;
+  name: string;
+  description: string;
+}
+
+export interface IMarket {
+  symbol: string;
+  imports: {
+      symbol: string;
+      name: string;
+      description: string;
+  }[];
+  exports: any[]; // Assuming exports is an empty array
+  exchange: Exchange[];
+  transactions: any[]; // Assuming transactions is an array of objects
+  tradeGoods: TradeGood[];
 }

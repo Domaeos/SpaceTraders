@@ -3,6 +3,7 @@ import { ContractCard } from "@/Components/ContractCard";
 import { UserContext } from "@/Contexts/UserContext";
 import { useContext, useMemo, useState } from "react"
 import { IContract } from '@/Types/types';
+import { Spinner } from "react-bootstrap";
 
 export default function Contracts() {
   const { user } = useContext(UserContext);
@@ -16,7 +17,7 @@ export default function Contracts() {
     setContracts(result);
   }, [user, refresh]);
 
-  if (isLoading) return <></>
+  if (isLoading) return <Spinner animation="border" variant="primary" />
 
   return (
     <>

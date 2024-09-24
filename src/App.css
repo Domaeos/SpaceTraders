@@ -11,9 +11,15 @@
 .navbar {
   color: aliceblue;
 }
+.navbar-toggler-icon {
+  color: aliceblue !important;
+  background-color: rgb(144, 145, 146);
+}
 
 .nav-brand {
   color: azure;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .nav-user-info {
@@ -159,4 +165,9 @@ div.waypoint-pills {
   grid-template-columns: repeat(4, auto 1fr);
   align-items: first baseline;
   margin: 2px;
+}
+
+.accordion-market-items {
+  display: grid;
+  grid-template-columns: 1fr auto;
 }

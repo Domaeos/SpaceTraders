@@ -20,21 +20,21 @@ export function Navigation() {
         setBalance(userInfo.credits);
       }
     })();
-  },[user]);
+  }, [user]);
 
   return (
-    <Navbar bg="dark">
-      <Navbar.Brand href="#home">
+    <Navbar bg="dark" expand="sm">
+      <Navbar.Brand>
         <h1 className="nav-brand">STQS</h1>
       </Navbar.Brand>
       <Navbar.Toggle />
 
-      {user &&
-        <>
-          <Navbar.Collapse className="justify-content-left">
-            <Nav.Item className="can-click nav-link">
-              <Nav.Link onClick={() => handleLink("/agents")}>Agents</Nav.Link>
-            </Nav.Item>
+      <Navbar.Collapse id="navbar-grid">
+        <Nav.Item className="can-click nav-link">
+          <Nav.Link onClick={() => handleLink("/agents")}>Agents</Nav.Link>
+        </Nav.Item>
+        {user &&
+          <>
             <Nav.Item className="can-click nav-link">
               <Nav.Link onClick={() => handleLink("/contracts")}>Contracts</Nav.Link>
             </Nav.Item>
@@ -44,14 +44,17 @@ export function Navigation() {
             <Nav.Item className="can-click nav-link">
               <Nav.Link onClick={() => handleLink("/ships")}>Ships</Nav.Link>
             </Nav.Item>
-          </Navbar.Collapse>
+          </>}
+      </Navbar.Collapse>
 
+      {user &&
+        <>
           <Nav.Item className="navbar-userInfo">
             <div className="align-text-right">Agent:</div><div className="bolden">{user.symbol}</div>
             <div className="align-text-right">Balance:</div><div className="bolden">{balance}</div>
           </Nav.Item>
         </>
       }
-    </Navbar>
+    </Navbar >
   );
 }
