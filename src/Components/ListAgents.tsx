@@ -28,7 +28,12 @@ export function ListAgents() {
     logInDev(axiosClient.defaults.headers.common['Authorization']);
   }
 
-  if (users.length === 0) return <></>;
+  if (users.length === 0) return (
+    <>
+    <h1>Agent required to access this app</h1>
+    <NewGame />
+    </>
+  )
 
   return (
     <>

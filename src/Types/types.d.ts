@@ -30,9 +30,20 @@ export interface IContract {
     payment: {
       onAccepted: number;
       onFulfilled: number;
-    }
+    },
+    deliver?: {
+      unitsFulfilled: number;
+      tradeSymbol: string;
+      unitsRequired: number;
+      destinationSymbol: string;
+    }[];
+  }
+  payment: {
+    onAccepted: number;
+    onFulfilled: number;
   }
 }
+
 
 export interface ITrait {
   symbol: string;
@@ -130,5 +141,6 @@ export interface IShip {
     shipSymbol: string;
     totalSeconds: number;
     remainingSeconds: number;
+    expiration?: string;
   };
 }

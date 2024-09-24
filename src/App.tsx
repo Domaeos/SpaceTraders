@@ -1,6 +1,5 @@
 import "@/App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import NewGame from "@/Components/NewGame";
 import { UserContext } from "@/Contexts/UserContext";
 import { useContext, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
@@ -16,12 +15,13 @@ import en from 'javascript-time-ago/locale/en'
 import getCurrentUserFromStorage from "./utils/getCurrentUserFromStorage";
 import axiosClient from "@/API/client";
 import Ships from "@/Pages/Ships";
+import AuthenticatedRoute from '@/Components/AuthenticatedRoutes';
 TimeAgo.addDefaultLocale(en)
 
 function App() {
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
 
-  useEffect(() =>{
+  useEffect(() => {
     const storedUser = getCurrentUserFromStorage();
     if (storedUser) {
       setUser(storedUser);
@@ -33,15 +33,21 @@ function App() {
     <>
       <Navigation />
       <div className="page-display">
-      <Routes>
-        <Route path="/" element={<NewGame />} />
-        <Route path="/agents" element={<ListAgents />} />
-        {user && <Route path="/navigation" element={<ShipNavigation />} />}
-        {user && <Route path="/contracts" element={<Contracts />} />}
-        {user && <Route path="/ships" element={<Ships />} />}
-      </Routes>
+        <Routes>
+          <Route path="/navigation" element={
+            <AuthenticatedRoute>
+              <ShipNavigation />
+            </AuthenticatedRoute>
+          } />
+          <Route path="/contracts" element={
+            <AuthenticatedRoute>
+              <Contracts />
+            </AuthenticatedRoute>} />
+          <Route path="/ships" element={<AuthenticatedRoute><Ships /></AuthenticatedRoute>} />
+          <Route path="/*" element={<ListAgents />} />
+        </Routes>
       </div>
-      <Toaster position="bottom-center"/>
+      <Toaster position="bottom-center" />
     </>
   );
 }
