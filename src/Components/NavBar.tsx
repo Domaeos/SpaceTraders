@@ -1,40 +1,57 @@
 import { UserContext } from "@/Contexts/UserContext";
-import { useContext } from "react";
-import { Navbar, Container, NavDropdown, Nav } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import fetchUserInfo from "@/utils/fetchUserInfo";
+import { useContext, useEffect, useState } from "react";
+import { Navbar, Nav } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 export function Navigation() {
+  const [balance, setBalance] = useState<number>(0);
   const { user } = useContext(UserContext);
+  const nav = useNavigate();
+
+  function handleLink(url: string) {
+    nav(url);
+  }
+
+  useEffect(() => {
+    (async () => {
+      if (user) {
+        const userInfo = await fetchUserInfo();
+        setBalance(userInfo.credits);
+      }
+    })();
+  },[user]);
 
   return (
     <Navbar bg="dark">
-      <Container>
-        <Navbar.Brand href="#home">
-          <h1 className="nav-brand">STQS</h1>
-        </Navbar.Brand>
-        <Navbar.Toggle />
+      <Navbar.Brand href="#home">
+        <h1 className="nav-brand">STQS</h1>
+      </Navbar.Brand>
+      <Navbar.Toggle />
 
-        <Nav.Link as={Link} to="/agents">Agents</Nav.Link>
-        <Nav.Link as={Link} to="/contracts">Contracts</Nav.Link>
-        <Nav.Link as={Link} to="/navigation">Navigation</Nav.Link>
-        <Nav.Link as={Link} to="/ships">Ships</Nav.Link>
+      {user &&
+        <>
+          <Navbar.Collapse className="justify-content-left">
+            <Nav.Item className="can-click nav-link">
+              <Nav.Link onClick={() => handleLink("/agents")}>Agents</Nav.Link>
+            </Nav.Item>
+            <Nav.Item className="can-click nav-link">
+              <Nav.Link onClick={() => handleLink("/contracts")}>Contracts</Nav.Link>
+            </Nav.Item>
+            <Nav.Item className="can-click nav-link">
+              <Nav.Link onClick={() => handleLink("/navigation")}>Navigation</Nav.Link>
+            </Nav.Item>
+            <Nav.Item className="can-click nav-link">
+              <Nav.Link onClick={() => handleLink("/ships")}>Ships</Nav.Link>
+            </Nav.Item>
+          </Navbar.Collapse>
 
-        <Navbar.Collapse className="justify-content-end">
-          {user && <NavDropdown title={user?.symbol} className="nav-user-info">
-              <NavDropdown.Item href="#action/3.2">
-                Switch agent
-              </NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.2">
-                Agent information
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="#action/3.4">
-                Delete agent
-              </NavDropdown.Item>
-            </NavDropdown>}
-
-        </Navbar.Collapse>
-      </Container>
+          <Nav.Item className="navbar-userInfo">
+            <div className="align-text-right">Agent:</div><div className="bolden">{user.symbol}</div>
+            <div className="align-text-right">Balance:</div><div className="bolden">{balance}</div>
+          </Nav.Item>
+        </>
+      }
     </Navbar>
   );
 }

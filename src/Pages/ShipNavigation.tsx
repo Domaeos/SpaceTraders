@@ -40,7 +40,6 @@ export default function ShipNavigation() {
       <Tabs
         activeKey={activeTab}
         id="justify-tab-example"
-        className="mb-3 waypoints-tabs"
         justify
         onSelect={(k) => setActiveTab(k || 'ALL')}
       >

@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
 import Badge from 'react-bootstrap/Badge';
 import ListGroup from 'react-bootstrap/ListGroup';
-import { IUser } from '../Types/types';
+import { IUser } from '@/Types/types';
 import { getUsersFromStorage } from '@/utils/getUsersFromStorage';
 import { UserContext } from '@/Contexts/UserContext';
 import { logInDev } from '@/utils/logInDev';
 import axiosClient from '@/API/client';
 import NewGame from './NewGame';
-import setCurrentUserInStorage from '../utils/setCurrentUserInStorage';
+import setCurrentUserInStorage from '@/utils/setCurrentUserInStorage';
 
 export function ListAgents() {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -26,7 +26,6 @@ export function ListAgents() {
 
     axiosClient.defaults.headers.common['Authorization'] = `Bearer ${userToSwapTo.token}`;
     logInDev(axiosClient.defaults.headers.common['Authorization']);
-
   }
 
   if (users.length === 0) return <></>;
@@ -39,7 +38,7 @@ export function ListAgents() {
           <ListGroup.Item
             as="li"
             action
-            className="d-flex justify-content-between align-items-start"
+            className={`d-flex justify-content-between align-items-start ${user && agent.token !== user.token ? 'can-click' : ''}`}
             disabled={user && agent.token === user.token || false}
             onClick={() => handleChangeUser(agent)}
             key={agent.accountId}

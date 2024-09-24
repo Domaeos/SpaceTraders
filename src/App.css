@@ -6,6 +6,9 @@
   width: 100vw;
   height: 100vh;
   margin: 0 auto;
+}
+
+.navbar {
   color: aliceblue;
 }
 
@@ -19,6 +22,12 @@
   flex-direction: column;
 }
 
+.ship-actions {
+  display: grid;
+  justify-content: center;
+  padding-bottom: 20px;
+}
+
 .center-content {
   display: grid;
   height: 100%;
@@ -29,13 +38,15 @@
 .page-display {
   display: grid;
   justify-content: center;
+  justify-items: center;
+  grid-template-columns: 1fr;
   width: 100vw;
   padding-top: 20px;
 }
 
 .agent-list {
-  min-width: 80vw;
-  max-width: 800px;
+  min-width: 500px;
+  width: 50vw;
 }
 
 div.contract-card {
@@ -50,11 +61,6 @@ div.waypoints-grid {
   gap: 10px;
   padding: 20px;
   grid-template-columns: 1fr 1fr;
-}
-
-div.waypoints-tabs {
-  grid-column: span 2;
-  justify-self: center;
 }
 
 div.waypoint-pills {
@@ -90,4 +96,46 @@ div.waypoint-pills {
 
 .ship-location-actions {
   padding-bottom: 10px;
+}
+
+.new-user-form {
+  width: 60vw;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+
+.register-user-form {
+  display: grid;
+  width: 60vw;
+  align-self: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.can-click {
+  cursor: pointer;
+}
+.bolden {
+  font-weight: bold;
+}
+.navbar-userInfo {
+  height: 100%;
+  display: grid;
+  align-items: center;
+  align-content: center;
+  align-content: center;
+  gap: 5px;
+  grid-template-columns: 1fr 1fr;
+  padding-right: 20px;
+}
+
+.align-text-right {
+  text-align: right;
+}
+.nav-link {
+  padding-right: 10px !important;
+}
+.nav-link:hover {
+  color: #73b5f8 !important;
 }

@@ -66,7 +66,7 @@ function NewGame() {
       });
 
       addUserToStorage({ symbol, accountId, token, factionName } as IUser);
-      setCurrentUserInStorage({symbol, accountId, token, factionName } as IUser);
+      setCurrentUserInStorage({ symbol, accountId, token, factionName } as IUser);
       axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
       toast.success("Agent created!")
@@ -80,59 +80,53 @@ function NewGame() {
   }
 
   return (
-    <>
-      <Form onSubmit={handleSubmit}>
-        <fieldset disabled={submitting}>
+    <Form className="register-user-form" onSubmit={handleSubmit}>
+      <fieldset disabled={submitting}>
 
-          <Form.Group as={Row} className="mb-3" controlId="formUsername">
-            <Form.Label column sm={2}>
-              Symbol
-            </Form.Label>
-            <Col>
-              <Form.Control
-                value={newUser.symbol}
-                isInvalid={symbolValidation}
-                onFocus={() => { setSymbolValidation(false) }}
-                onChange={(e) => {
-                  setNewUser(x => {
-                    return { ...x, symbol: e.target.value }
-                  });
-                }}
-                aria-label="Username" type="text"
-                placeholder="Username" />
-              {symbolValidation && (<Form.Control.Feedback type="invalid">
-                Please enter a name for your character between 5 and 14 characters
-              </Form.Control.Feedback>)}
-            </Col>
-          </Form.Group>
+        <Form.Group as={Row} className="mb-3" controlId="formUsername">
+          <Col>
+            <Form.Control
+              value={newUser.symbol}
+              isInvalid={symbolValidation}
+              onFocus={() => { setSymbolValidation(false) }}
+              onChange={(e) => {
+                setNewUser(x => {
+                  return { ...x, symbol: e.target.value }
+                });
+              }}
+              aria-label="Username" type="text"
+              placeholder="Username" />
+            {symbolValidation && (<Form.Control.Feedback type="invalid">
+              Please enter a name for your character between 5 and 14 characters
+            </Form.Control.Feedback>)}
+          </Col>
+        </Form.Group>
 
-          <Form.Group as={Row} className="mb-3" controlId="formFaction">
-            <Form.Label column sm={2}>
-              Faction
-            </Form.Label>
-            <Col sm={10}>
-              <Form.Select
-                value={newUser.faction}
-                onChange={(e) => {
-                  setNewUser(x => {
-                    return { ...x, faction: e.target.value }
-                  });
-                }}
-                aria-label="Choose a faction">
-                {factions && factions.map((faction) => {
-                  return (<option key={faction.symbol} value={faction.symbol}>{faction.name}</option>)
-                })}
-              </Form.Select>
-            </Col>
-          </Form.Group>
+        <Form.Group as={Row} className="mb-3" controlId="formFaction">
+          <Col>
+            <Form.Select
+              value={newUser.faction}
+              onChange={(e) => {
+                setNewUser(x => {
+                  return { ...x, faction: e.target.value }
+                });
+              }}
+              aria-label="Choose a faction">
+              {factions && factions.map((faction) => {
+                return (<option key={faction.symbol} value={faction.symbol}>{faction.name}</option>)
+              })}
+            </Form.Select>
+          </Col>
+        </Form.Group>
 
-          <Form.Group as={Row} className="mb-3">
-            <Button type="submit">Register</Button>
-          </Form.Group>
-        </fieldset>
+        <Form.Group>
+          <Col className="text-center">
+          <Button type="submit">New agent</Button>
+          </Col>
+        </Form.Group>
+      </fieldset>
 
-      </Form >
-    </>
+    </Form >
   )
 
 }
