@@ -1,7 +1,7 @@
 import { logInDev } from "@/utils/logInDev";
 import axiosClient from "./client";
 
-export default async function fetchAllWaypoints(systemSymbol: string, traits: string) {
+export default async function fetchAllWaypoints(systemSymbol: string, traits?: string) {
   try {
     const url = `systems/${systemSymbol}/waypoints?${traits && "traits=" + (traits === "ALL" ? "" : traits)}`;
     const result = await axiosClient.get(url);

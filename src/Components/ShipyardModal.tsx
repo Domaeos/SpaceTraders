@@ -7,6 +7,7 @@ import { logInDev } from '@/utils/logInDev';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Button, ListGroup } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
+import toast from 'react-hot-toast';
 
 export default function ShipyardModal({ system, show, setShow, waypoint, setRefresh }:
   {
@@ -33,7 +34,10 @@ export default function ShipyardModal({ system, show, setShow, waypoint, setRefr
     const purchase = await purchaseShip(type, ships!.symbol);
     if (purchase) {
       setShow(false);
+      toast.success("Ship purchased");
       setRefresh(x => !x);
+    } else {
+      toast.error("Failed to purchase");
     }
   }
 

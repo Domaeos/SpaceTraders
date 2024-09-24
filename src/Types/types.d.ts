@@ -41,17 +41,17 @@ export interface ITrait {
 }
 
 export interface IWayPoint {
-    systemSymbol: string;
-    symbol: string;
-    type: string;
-    x: number;
-    y: number;
-    orbitals: any[];
-    traits: ITrait[];
-    modifiers: any[];
-    chart: IChart;
-    faction: IFaction;
-    isUnderConstruction: boolean;
+  systemSymbol: string;
+  symbol: string;
+  type: string;
+  x: number;
+  y: number;
+  orbitals: any[];
+  traits: ITrait[];
+  modifiers: any[];
+  chart: IChart;
+  faction: IFaction;
+  isUnderConstruction: boolean;
 }
 
 export interface IShipyard {
@@ -72,6 +72,11 @@ export interface IShip {
     waypointSymbol: string;
     status: string;
     type: string;
+    flightMode?: string;
+    route?: {
+      arrival: string;
+      departureTime: string;
+    }
   };
   crew: {
     current: number;

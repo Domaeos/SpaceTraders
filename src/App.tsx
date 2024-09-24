@@ -15,9 +15,7 @@ import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import getCurrentUserFromStorage from "./utils/getCurrentUserFromStorage";
 import axiosClient from "@/API/client";
-import { logInDev } from "@/utils/logInDev";
 import Ships from "@/Pages/Ships";
-
 TimeAgo.addDefaultLocale(en)
 
 function App() {
@@ -27,7 +25,6 @@ function App() {
     const storedUser = getCurrentUserFromStorage();
     if (storedUser) {
       setUser(storedUser);
-      logInDev(storedUser.token);
       axiosClient.defaults.headers.common['Authorization'] = `Bearer ${storedUser.token}`;
     }
   }, [])
@@ -37,11 +34,11 @@ function App() {
       <Navigation />
       <div className="page-display">
       <Routes>
-        <Route path="/" element=<NewGame /> />
-        <Route path="/agents" element=<ListAgents /> />
-        {user && <Route path="/navigation" element=<ShipNavigation /> />}
-        {user && <Route path="/contracts" element=<Contracts /> />}
-        {user && <Route path="/ships" element=<Ships /> />}
+        <Route path="/" element={<NewGame />} />
+        <Route path="/agents" element={<ListAgents />} />
+        {user && <Route path="/navigation" element={<ShipNavigation />} />}
+        {user && <Route path="/contracts" element={<Contracts />} />}
+        {user && <Route path="/ships" element={<Ships />} />}
       </Routes>
       </div>
       <Toaster position="bottom-center"/>
