@@ -36,9 +36,9 @@ export function ContractCard({ contract, setRefresh }: { contract: IContract, se
       <Card.Header>
         Terms
       </Card.Header>
-      <Card.Subtitle>
-          Deliver:
-        </Card.Subtitle>
+      <Card.Header>
+        Deliver:
+      </Card.Header>
       <Card.Body>
         <Card.Text>
           {contract.terms.deliver && contract.terms.deliver.map((item, index) => {

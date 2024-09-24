@@ -1,5 +1,6 @@
 import { IWayPoint } from "@/Types/types";
 import { Card, Button, Badge } from "react-bootstrap";
+import formatString from '../utils/formatString';
 
 export default function WaypointCard({ waypoint }
   : { waypoint: IWayPoint }) {
@@ -8,7 +9,7 @@ export default function WaypointCard({ waypoint }
     <Card>
       <Card.Header>{waypoint.symbol}</Card.Header>
       <Card.Body>
-        <Card.Title>{waypoint.type}</Card.Title>
+        <Card.Title>{formatString(waypoint.type)}</Card.Title>
         <Button variant={waypoint.type !== "ORBITAL_STATION" ? "secondary" : "primary"}
           disabled={true}>{waypoint.type !== "ORBITAL_STATION" ? "View details" : "View ships" }</Button>
       </Card.Body>

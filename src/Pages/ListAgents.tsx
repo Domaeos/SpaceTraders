@@ -6,7 +6,7 @@ import { getUsersFromStorage } from '@/utils/getUsersFromStorage';
 import { UserContext } from '@/Contexts/UserContext';
 import { logInDev } from '@/utils/logInDev';
 import axiosClient from '@/API/client';
-import NewGame from './NewGame';
+import NewGame from '@/Components/NewGame';
 import setCurrentUserInStorage from '@/utils/setCurrentUserInStorage';
 
 export function ListAgents() {

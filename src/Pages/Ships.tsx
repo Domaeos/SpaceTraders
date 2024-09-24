@@ -1,12 +1,12 @@
 import fetchShips from "@/API/fetchShips";
 import fetchWaypoint from "@/API/fetchWaypoint";
 import InfoBar from "@/Components/InfoBar";
-import { IShip, IWayPoint } from "@/Types/types";
+import { ICargo, IModalSystem, IShip, IWayPoint } from "@/Types/types";
 import { logInDev } from "@/utils/logInDev";
-import { useEffect, useState } from "react"
-import { Accordion, Badge, Button, ButtonGroup, Dropdown, ProgressBar } from "react-bootstrap";
+import { useContext, useEffect, useMemo, useState } from "react"
+import { Accordion, Badge, Button, ButtonGroup, Dropdown, ProgressBar, Spinner } from "react-bootstrap";
 import formatString from '@/utils/formatString';
-import WaypointModal from "@/Components/ShipyardModal";
+import InfoModal from "@/Components/InfoModal";
 import fetchAllWaypoints from "@/API/fetchAllWaypoints";
 import setOrbit from "@/API/setOrbit";
 import toast from "react-hot-toast";
@@ -15,18 +15,44 @@ import ReactTimeAgo from "react-time-ago";
 import setDock from "@/API/setDock";
 import refuelShip from "@/API/refuelShip";
 import extract from "@/API/extract";
+import { ContractsContext } from "@/Contexts/ContractsContext";
+
+export enum ModalActions {
+  SHIPYARD = "SHIPYARD",
+  MARKETPLACE = "MARKETPLACE"
+}
 
 export default function Ships() {
+  const { contracts } = useContext(ContractsContext);
+  const [deliverPoints, setDeliverPoints] = useState<{ waypoint: string, items: string, unitsRequired: number, unitsFulfilled: number }[]>([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [ships, setShips] = useState<IShip[]>([]);
   const [waypoints, setWaypoints] = useState<{ [key: string]: IWayPoint }>({});
   const [showModal, setShowModal] = useState(false);
-  const [viewSystem, setViewSystem] = useState<IWayPoint>({} as IWayPoint);
+  const [viewSystem, setViewSystem] = useState<IModalSystem>({} as IModalSystem);
   const [refresh, setRefresh] = useState(false);
   const [navigationWaypoints, setNavigationWaypoints] = useState<{ [key: string]: IWayPoint[] }>({});
   const [time, setTime] = useState(Date.now());
 
   const [initialLoad, setInitialLoad] = useState(true);
+
+  useMemo(() => {
+    const deliveryContracts: { waypoint: string, items: string, unitsRequired: number, unitsFulfilled: number }[] = [];
+
+    contracts && contracts.forEach(contract => {
+      if (contract.accepted) {
+        if (contract.type === "PROCUREMENT") {
+          contract?.terms?.deliver?.length && contract.terms.deliver.forEach(deliver => {
+            if (deliver.unitsFulfilled < deliver.unitsRequired) {
+              deliveryContracts.push({ waypoint: deliver.destinationSymbol, items: deliver.tradeSymbol, unitsRequired: deliver.unitsRequired, unitsFulfilled: deliver.unitsFulfilled });
+            }
+          })
+        }
+      }
+    })
+    setDeliverPoints(deliveryContracts);
+  }, [contracts]);
 
   useEffect(() => {
     if (initialLoad) setIsLoading(true);
@@ -40,10 +66,12 @@ export default function Ships() {
         setIsLoading(false);
         setInitialLoad(false);
       }
+
     })();
   }, [refresh]);
 
   useEffect(() => {
+
     const interval = setInterval(() => {
       setTime(() => {
         return new Date().getTime();
@@ -69,8 +97,10 @@ export default function Ships() {
     }
   }
 
-  function handleModal(waypoint: IWayPoint) {
-    setViewSystem(waypoint);
+  function handleModal(waypoint: IWayPoint, type: ModalActions, cargo: ICargo, shipSymbol: string) {
+    setViewSystem({ waypoint: waypoint.symbol, type, cargo, shipSymbol });
+    logInDev("Modal: " + type);
+    logInDev(waypoint)
     setShowModal(true);
   }
 
@@ -157,9 +187,7 @@ export default function Ships() {
     setRefresh(refresh => !refresh);
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>
-  }
+  if (isLoading) return <Spinner animation="border" variant="primary" />
 
   return (
     <>
@@ -185,17 +213,20 @@ export default function Ships() {
               <InfoBar reverseTint={true} current={ship.crew.current} full={ship.crew.capacity} />
               <div>Fuel:</div>
               <InfoBar current={ship.fuel.current} full={ship.fuel.capacity} />
+              <div>Cargo:</div>
+              <InfoBar reverseTint={true} current={ship.cargo.units} full={ship.cargo.capacity} />
+
             </Accordion.Body>
 
             <Accordion.Body className="accordion-cargo-information">
-              <h5 className="grid-span-8">Cargo: {ship.cargo.units}/{ship.cargo.capacity}</h5>
-              {ship.cargo.inventory.length ? ship.cargo.inventory.map(item => {
+              <h5 className="grid-span-8">Cargo</h5>
+              {ship.cargo.inventory.length ? ship.cargo.inventory.map((item, index) => {
                 return (
                   <>
-                    <div className="align-text-right">
+                    <div className="align-text-right" key={item.name}>
                       {item.name}
                     </div>
-                    <div className="align-text-left bolden text-sm">{item.units}
+                    <div className="align-text-left bolden text-sm" key={`${item.name}${index}`}>{item.units}
                     </div>
                   </>
                 )
@@ -213,16 +244,23 @@ export default function Ships() {
                       && (
                         <Button size="sm"
                           disabled={ship.nav.status !== "DOCKED"}
-                          onClick={() => { handleModal(waypoints[ship.symbol]) }}>View ships
+                          onClick={() => { handleModal(waypoints[ship.symbol], ModalActions.SHIPYARD, ship.cargo, ship.symbol) }}>View ships
                         </Button>)}
 
-                    {waypoints[ship.symbol].traits.some(some => some.symbol === "MARKETPLACE")
-                      && (<Button size="sm" disabled onClick={() => { handleModal(waypoints[ship.symbol]) }}>View market</Button>)}
+                    {
+                      waypoints[ship.symbol].traits.some(some => some.symbol === "MARKETPLACE")
+                      && (<Button size="sm" disabled={ship.nav.status !== "DOCKED"} onClick={() => { handleModal(waypoints[ship.symbol], ModalActions.MARKETPLACE, ship.cargo, ship.symbol) }}>View market</Button>)
+                    }
+
+                    {
+                      deliverPoints.some(point => point.waypoint === ship.nav.waypointSymbol) &&
+                      <Button size="sm">Deliver items</Button>
+                    }
 
                     {
                       ship.nav.status === "IN_ORBIT" ?
                         <>
-                          <Button onClick={() => handleDock(ship)}>Dock</Button>
+                          <Button size="sm" onClick={() => handleDock(ship)}>Dock</Button>
                           {ship.frame.name === "Drone" &&
                             <Button
                               disabled={checkExpired(ship.cooldown.expiration ?? "1")}
@@ -241,8 +279,8 @@ export default function Ships() {
                 ) : ship.nav.flightMode && ship.nav?.route && (
                   <>
                     <div className="grid-span-4">Flight mode: {formatString(ship.nav!.flightMode)}</div>
-                    <div className="grid-span-4">Arriving:  <ReactTimeAgo date={new Date(ship.nav.route.arrival)} /></div>
                     <div className="grid-span-4">Departed:  <ReactTimeAgo date={new Date(ship.nav.route.departureTime)} /></div>
+                    <div className="grid-span-4">Arriving:  <ReactTimeAgo date={new Date(ship.nav.route.arrival)} /></div>
                     <ProgressBar
                       className="grid-span-4"
                       animated
@@ -255,7 +293,7 @@ export default function Ships() {
                   ship.nav.status === "IN_ORBIT" &&
                   <div className="ship-actions">
                     <Dropdown style={{ display: "inline" }}>
-                      <Dropdown.Toggle variant="primary" id="dropdown-navigation">
+                      <Dropdown.Toggle variant="success" size="sm" id="dropdown-navigation">
                         Navigation
                       </Dropdown.Toggle>
 
@@ -286,7 +324,7 @@ export default function Ships() {
 
         ))}
       </Accordion>
-      <WaypointModal show={showModal} setRefresh={setRefresh} setShow={setShowModal} system={viewSystem.systemSymbol} waypoint={viewSystem} />
+      <InfoModal show={showModal} setRefresh={setRefresh} setShow={setShowModal} system={viewSystem} />
     </>
   )
 }
