@@ -133,9 +133,30 @@ div.waypoint-pills {
 .align-text-right {
   text-align: right;
 }
+.align-text-left {
+  text-align: left;
+}
+.text-sm {
+  font-size: 0.8rem;
+}
 .nav-link {
   padding-right: 10px !important;
 }
 .nav-link:hover {
   color: #73b5f8 !important;
+}
+
+.grid-span-8 {
+  grid-column: span 8;
+}
+
+.accordion-cargo-information {
+  display: grid;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(163, 188, 237);
+  gap: 5px;
+  grid-template-columns: repeat(4, auto 1fr);
+  align-items: first baseline;
+  margin: 2px;
 }

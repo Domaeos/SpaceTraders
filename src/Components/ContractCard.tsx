@@ -1,14 +1,19 @@
 import acceptContract from "@/API/acceptContract";
 import { IContract } from "@/Types/types";
 import convertBooleanToYesOrNo from "@/utils/convertBooleanToYesOrNo";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Card, Button, ListGroup, Col, Container, Row } from 'react-bootstrap';
 import toast from "react-hot-toast";
 import ReactTimeAgo from "react-time-ago";
+import formatString from '../utils/formatString';
 
 export function ContractCard({ contract, setRefresh }: { contract: IContract, setRefresh: Dispatch<SetStateAction<boolean>> }) {
 
   const [isAccepting, setIsAccepting] = useState(false);
+
+  useEffect(() => {
+    console.log(contract);
+  }, [contract]);
 
   async function handleAccept(contract: IContract) {
     setIsAccepting(true);
@@ -27,6 +32,29 @@ export function ContractCard({ contract, setRefresh }: { contract: IContract, se
       <Card.Body>
         <Card.Title>{contract.factionSymbol}-{(contract.id.slice(0, 3)).toUpperCase()}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted">{contract.type}</Card.Subtitle>
+      </Card.Body>
+      <Card.Header>
+        Terms
+      </Card.Header>
+      <Card.Subtitle>
+          Deliver:
+        </Card.Subtitle>
+      <Card.Body>
+        <Card.Text>
+          {contract.terms.deliver && contract.terms.deliver.map((item, index) => {
+            return <div key={index}>{item.unitsRequired} {formatString(item.tradeSymbol)} to {item.destinationSymbol}</div>
+          })}
+        </Card.Text>
+      </Card.Body>
+      <Card.Header>
+        Progress
+      </Card.Header>
+      <Card.Body>
+        <Card.Text>
+          {contract.terms.deliver && contract.terms.deliver.map((item, index) => {
+            return <div key={index}>{item.unitsFulfilled}/{item.unitsRequired} {formatString(item.tradeSymbol)}</div>
+          })}
+        </Card.Text>
       </Card.Body>
       <ListGroup variant="flush">
         <ListGroup.Item>Expires: <ReactTimeAgo date={new Date(contract.expiration)} /></ListGroup.Item>

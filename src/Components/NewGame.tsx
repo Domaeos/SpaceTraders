@@ -14,6 +14,7 @@ import setCurrentUserInStorage from "@/utils/setCurrentUserInStorage";
 function NewGame() {
   const [factions, setFactions] = useState<IFaction[] | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [newUser, setNewUser] = useState({
     symbol: "",
     faction: "COSMIC",
@@ -26,6 +27,7 @@ function NewGame() {
     (async () => {
       const factions = await fetchFactions();
       setFactions(factions!.data.data);
+      setIsLoading(false);
     })();
 
   }, []);
@@ -81,7 +83,7 @@ function NewGame() {
 
   return (
     <Form className="register-user-form" onSubmit={handleSubmit}>
-      <fieldset disabled={submitting}>
+      <fieldset disabled={submitting || isLoading}>
 
         <Form.Group as={Row} className="mb-3" controlId="formUsername">
           <Col>

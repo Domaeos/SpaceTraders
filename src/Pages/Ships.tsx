@@ -13,6 +13,8 @@ import toast from "react-hot-toast";
 import shipNavigation from "@/API/shipNavigation";
 import ReactTimeAgo from "react-time-ago";
 import setDock from "@/API/setDock";
+import refuelShip from "@/API/refuelShip";
+import extract from "@/API/extract";
 
 export default function Ships() {
   const [isLoading, setIsLoading] = useState(true);
@@ -24,13 +26,20 @@ export default function Ships() {
   const [navigationWaypoints, setNavigationWaypoints] = useState<{ [key: string]: IWayPoint[] }>({});
   const [time, setTime] = useState(Date.now());
 
+  const [initialLoad, setInitialLoad] = useState(true);
+
   useEffect(() => {
-    setIsLoading(true);
+    if (initialLoad) setIsLoading(true);
+
     (async () => {
       const shipsResult = await fetchShips();
       await getShipNavigation(shipsResult);
       setShips(shipsResult);
-      setIsLoading(false);
+
+      if (initialLoad) {
+        setIsLoading(false);
+        setInitialLoad(false);
+      }
     })();
   }, [refresh]);
 
@@ -65,6 +74,17 @@ export default function Ships() {
     setShowModal(true);
   }
 
+  function handleError(code: number) {
+    logInDev(`Error code: ${code}`);
+    switch (code) {
+      case 4203:
+        toast.error("Not enough fuel");
+        break;
+      default:
+        toast.error("Something went wrong");
+    }
+  }
+
   async function handleShipNav(ship: IShip, newWayPoint: string) {
     logInDev(`Setting ${ship.symbol} to navigate to ${newWayPoint}`);
 
@@ -77,13 +97,7 @@ export default function Ships() {
 
     } else {
 
-      switch (result.code) {
-        case 4203:
-          toast.error("Not enough fuel");
-          break;
-        default:
-          toast.error("Something went wrong");
-      }
+      handleError(result.code);
 
     }
   }
@@ -98,27 +112,49 @@ export default function Ships() {
       setRefresh(refresh => !refresh);
 
     } else {
+      handleError(result.code);
+    }
+  }
 
-      logInDev(result);
+  function checkExpired(timeToCheck: string) {
+    const timeToCheckEpoch = new Date(timeToCheck).getTime();
+    return timeToCheckEpoch > time;
+  }
 
-      switch (result.code) {
-        default:
-          toast.error("Something went wrong");
-      }
+  async function handleRefuel(ship: IShip) {
+    logInDev("Refuelling ship");
+    const result = await refuelShip(ship.symbol);
+
+    if (result.code === 200) {
+
+      toast.success("Ship successfully refuelled");
+      setRefresh(refresh => !refresh);
+
+    } else {
+      handleError(result.code);
+    }
+  }
+
+  async function handleExtraction(ship: IShip) {
+    logInDev("Extracting began");
+    const result = await extract(ship.symbol);
+    if (result.code === 200) {
+
+      toast.success("Extraction began");
+      setRefresh(refresh => !refresh);
+
+    } else {
+      handleError(result.code);
     }
   }
 
   async function handleOrbit(ship: IShip) {
     const loadingToast = toast.loading("Setting ship to orbit");
-    const orbit = await setOrbit(ship.symbol);
+    const result = await setOrbit(ship.symbol);
     toast.dismiss(loadingToast);
-    orbit ? toast.success("Ship is now in orbit") : toast.error("Ship could not orbit");
-    if (orbit) {
-      toast.success("Ship is now in orbit")
-      setRefresh(refresh => !refresh);
-    } else {
-      toast.error("Ship could not orbit");
-    }
+
+    result.code === 200 ? toast.success("Ship is now in orbit") : handleError(result.code);
+    setRefresh(refresh => !refresh);
   }
 
   if (isLoading) {
@@ -140,11 +176,32 @@ export default function Ships() {
               <div className="grid-span-4">{ship.frame.description}</div>
               <div className="grid-span-4">Status: {formatString(ship.nav.status)}</div>
               <div className="grid-span-4">Type: {formatString(ship.frame.name)}</div>
+              {ship.cooldown.expiration && new Date(ship.cooldown.expiration).getTime() > time &&
+                <>
+                  <div className="grid-span-4">Cooldown over:  <ReactTimeAgo className="grid-span-4" date={new Date(ship.cooldown.expiration)} /></div>
+                </>
+              }
               <div>Crew:</div>
               <InfoBar reverseTint={true} current={ship.crew.current} full={ship.crew.capacity} />
               <div>Fuel:</div>
               <InfoBar current={ship.fuel.current} full={ship.fuel.capacity} />
             </Accordion.Body>
+
+            <Accordion.Body className="accordion-cargo-information">
+              <h5 className="grid-span-8">Cargo: {ship.cargo.units}/{ship.cargo.capacity}</h5>
+              {ship.cargo.inventory.length ? ship.cargo.inventory.map(item => {
+                return (
+                  <>
+                    <div className="align-text-right">
+                      {item.name}
+                    </div>
+                    <div className="align-text-left bolden text-sm">{item.units}
+                    </div>
+                  </>
+                )
+              }) : "No cargo onboard"}
+            </Accordion.Body>
+
 
             <Accordion.Body>
               <h5>{ship.nav.status === "IN_TRANSIT" ? `Navigating to` : `Location`} - {ship.nav.waypointSymbol} - {formatString(waypoints[ship.symbol].type)}</h5>
@@ -164,9 +221,21 @@ export default function Ships() {
 
                     {
                       ship.nav.status === "IN_ORBIT" ?
-                        <Button onClick={() => handleDock(ship)}>Dock</Button>
+                        <>
+                          <Button onClick={() => handleDock(ship)}>Dock</Button>
+                          {ship.frame.name === "Drone" &&
+                            <Button
+                              disabled={checkExpired(ship.cooldown.expiration ?? "1")}
+                              size="sm"
+                              onClick={() => { handleExtraction(ship) }}>
+                              Extract resources
+                            </Button>}
+                        </>
                         :
-                        <Button size="sm" onClick={() => { handleOrbit(ship) }}>Orbit</Button>
+                        <>
+                          <Button size="sm" onClick={() => { handleOrbit(ship) }}>Orbit</Button>
+                          <Button size="sm" onClick={() => { handleRefuel(ship) }}>Refuel</Button>
+                        </>
                     }
                   </ButtonGroup>
                 ) : ship.nav.flightMode && ship.nav?.route && (
