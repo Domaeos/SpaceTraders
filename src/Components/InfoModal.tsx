@@ -1,8 +1,10 @@
 
+import buyItems from '@/API/buyItems';
 import fetchMarket from '@/API/fetchMarket';
 import fetchShipyard from '@/API/fetchShipyard';
 import purchaseShip from '@/API/purchaseShip';
 import sellItems from '@/API/sellItems';
+import { handleError } from '@/Pages/Ships';
 import { IMarket, IModalSystem, IShipyard, ITradeGood } from '@/Types/types';
 import formatString from '@/utils/formatString';
 import { logInDev } from '@/utils/logInDev';
@@ -16,7 +18,7 @@ enum TransactionType {
   SELL = "SELL"
 }
 
-export default function ShipyardModal({ system, show, setShow, setRefresh }:
+export default function InfoModal({ system, show, setShow, setRefresh }:
   {
     system: IModalSystem,
     show: boolean,
@@ -90,8 +92,9 @@ export default function ShipyardModal({ system, show, setShow, setRefresh }:
       setShow(false);
       toast.success("Ship purchased");
       setRefresh(x => !x);
+      setShow(false);
     } else {
-      toast.error("Failed to purchase");
+      handleError(500);
     }
   }
 
@@ -101,13 +104,31 @@ export default function ShipyardModal({ system, show, setShow, setRefresh }:
     e.preventDefault();
     logInDev("Transaction type: " + type);
 
+    let result;
     switch (type) {
       case TransactionType.SELL:
-        const result = await sellItems(system.shipSymbol, itemsToSell);
+        result = await sellItems(system.shipSymbol, itemsToSell);
+        logInDev("Result of selling items:");
         logInDev(result);
+        if (result.code === 201) {
+          toast.success("Items sold");
+          setRefresh(x => !x);
+          setShow(false);
+        } else {
+          handleError(result.code);
+        }
         break;
       case TransactionType.BUY:
-        //handle buying
+        result = await buyItems(system.shipSymbol, itemsToBuy);
+        logInDev("Result of buying items:");
+        logInDev(result);
+        if(result.code === 201) {
+          toast.success("Items bought");
+          setShow(false);
+
+        } else {
+          handleError(result.code);
+        }
         break;
       default:
         break
@@ -172,7 +193,7 @@ export default function ShipyardModal({ system, show, setShow, setRefresh }:
                           </InputGroup>
                         )
                       })}
-                      <Button type="submit" disabled={!(Object.keys(itemsToSell).length)} onClick={(e) => handleTransaction(e, TransactionType.SELL)}>Sell</Button>
+                      {(Object.keys(itemsToSell).length) ? <Button type="submit" onClick={(e) => handleTransaction(e, TransactionType.SELL)}>Sell</Button> : ""}
                     </Form>
 
                   </Accordion.Body>
@@ -208,7 +229,7 @@ export default function ShipyardModal({ system, show, setShow, setRefresh }:
                           </InputGroup>
                         )
                       })}
-                      <Button type="submit" disabled onClick={(e) => handleTransaction(e, TransactionType.BUY)}>Buy</Button>
+                      <Button type="submit" disabled={!(Object.values(itemsToBuy).some((x: { current: number, max: number, costPer: number }) => x.current > 0))} onClick={(e) => handleTransaction(e, TransactionType.BUY)}>Buy</Button>
                     </Form>
                   </Accordion.Body>
                 </Accordion.Item>

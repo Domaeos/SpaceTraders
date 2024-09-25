@@ -3,7 +3,7 @@ import fetchWaypoint from "@/API/fetchWaypoint";
 import InfoBar from "@/Components/InfoBar";
 import { ICargo, IModalSystem, IShip, IWayPoint } from "@/Types/types";
 import { logInDev } from "@/utils/logInDev";
-import { useContext, useEffect, useMemo, useState } from "react"
+import { useContext, useEffect, useState, ReactElement } from 'react';
 import { Accordion, Badge, Button, ButtonGroup, Dropdown, ProgressBar, Spinner } from "react-bootstrap";
 import formatString from '@/utils/formatString';
 import InfoModal from "@/Components/InfoModal";
@@ -16,10 +16,25 @@ import setDock from "@/API/setDock";
 import refuelShip from "@/API/refuelShip";
 import extract from "@/API/extract";
 import { ContractsContext } from "@/Contexts/ContractsContext";
+import deliverItems from "@/API/deliverItems";
 
 export enum ModalActions {
   SHIPYARD = "SHIPYARD",
   MARKETPLACE = "MARKETPLACE"
+}
+
+export function handleError(code: number) {
+  logInDev(`Error code: ${code}`);
+  switch (code) {
+    case 4203:
+      toast.error("Not enough fuel");
+      break;
+    case 4217:
+      toast.error("Not enough cargo space");
+      break;
+    default:
+      toast.error("Something went wrong");
+  }
 }
 
 export default function Ships() {
@@ -37,7 +52,7 @@ export default function Ships() {
 
   const [initialLoad, setInitialLoad] = useState(true);
 
-  useMemo(() => {
+  useEffect(() => {
     const deliveryContracts: { waypoint: string, items: string, unitsRequired: number, unitsFulfilled: number }[] = [];
 
     contracts && contracts.forEach(contract => {
@@ -52,7 +67,7 @@ export default function Ships() {
       }
     })
     setDeliverPoints(deliveryContracts);
-  }, [contracts]);
+  }, [contracts, refresh]);
 
   useEffect(() => {
     if (initialLoad) setIsLoading(true);
@@ -102,17 +117,6 @@ export default function Ships() {
     logInDev("Modal: " + type);
     logInDev(waypoint)
     setShowModal(true);
-  }
-
-  function handleError(code: number) {
-    logInDev(`Error code: ${code}`);
-    switch (code) {
-      case 4203:
-        toast.error("Not enough fuel");
-        break;
-      default:
-        toast.error("Something went wrong");
-    }
   }
 
   async function handleShipNav(ship: IShip, newWayPoint: string) {
@@ -178,6 +182,32 @@ export default function Ships() {
     }
   }
 
+  async function handleDelivery(ship: IShip) {
+
+    const deliveryContract = contracts?.find(contract =>
+      contract.terms?.deliver?.some(deliver => deliver.destinationSymbol === ship.nav.waypointSymbol)
+    );
+
+    if (deliveryContract?.terms.deliver) {
+      deliveryContract.terms.deliver.forEach(async (deliver) => {
+        logInDev("Cargo:");
+        logInDev(ship.cargo.inventory);
+        const amountInCargo = ship.cargo.inventory.find(item => item.symbol === deliver.tradeSymbol)?.units ?? 0;
+        logInDev("Amount in cargo: " + amountInCargo);
+        if (amountInCargo <= 0) return;
+
+        const amountToDeliver = amountInCargo < (deliver.unitsRequired - deliver.unitsFulfilled) ? amountInCargo : deliver.unitsRequired - deliver.unitsFulfilled;
+        logInDev(`Amount to deliver for ${deliver.tradeSymbol}: ${amountToDeliver}`);
+
+        await deliverItems(deliveryContract.id, { shipSymbol: ship.symbol, tradeSymbol: deliver.tradeSymbol, units: amountToDeliver });
+
+      });
+      setRefresh(refresh => !refresh);
+    }
+
+    console.log(deliveryContract);
+  }
+
   async function handleOrbit(ship: IShip) {
     const loadingToast = toast.loading("Setting ship to orbit");
     const result = await setOrbit(ship.symbol);
@@ -235,7 +265,7 @@ export default function Ships() {
 
 
             <Accordion.Body>
-              <h5>{ship.nav.status === "IN_TRANSIT" ? `Navigating to` : `Location`} - {ship.nav.waypointSymbol} - {formatString(waypoints[ship.symbol].type)}</h5>
+              <h5>{ship.nav.status === "IN_TRANSIT" && (ship.nav.route && new Date(ship.nav.route.arrival).getTime() < time) ? `Navigating to` : `Location`} - {ship.nav.waypointSymbol} - {formatString(waypoints[ship.symbol].type)}</h5>
               <div className="ship-location-information">
                 {ship.nav.status !== "IN_TRANSIT" ||
                   (ship.nav.status === "IN_TRANSIT" && new Date(ship.nav!.route!.arrival).getTime() < time) ? (
@@ -254,14 +284,14 @@ export default function Ships() {
 
                     {
                       deliverPoints.some(point => point.waypoint === ship.nav.waypointSymbol) &&
-                      <Button size="sm">Deliver items</Button>
+                      <Button size="sm" onClick={() => handleDelivery(ship)}>Deliver items</Button>
                     }
 
                     {
                       ship.nav.status === "IN_ORBIT" ?
                         <>
                           <Button size="sm" onClick={() => handleDock(ship)}>Dock</Button>
-                          {ship.frame.name === "Drone" &&
+                          {ship.frame.name === "Drone" && waypoints[ship.symbol].type.includes("ASTEROID") &&
                             <Button
                               disabled={checkExpired(ship.cooldown.expiration ?? "1")}
                               size="sm"
@@ -299,13 +329,31 @@ export default function Ships() {
 
                       <Dropdown.Menu>
                         {navigationWaypoints[ship.nav.systemSymbol].map((waypoint) => {
-
                           if (waypoint.symbol === ship.nav.waypointSymbol) return "";
 
                           return (<Dropdown.Item key={waypoint.symbol} onClick={() => { handleShipNav(ship, waypoint.symbol) }}>
                             {waypoint.symbol} - {formatString(waypoint.type)}
                           </Dropdown.Item>)
                         })}
+
+                        {contracts?.length &&
+                          <>
+                            <Dropdown.Divider />
+                            <Dropdown.Header>Contracts</Dropdown.Header>
+                          </>}
+
+                        {contracts && contracts?.filter(contract => contract.terms?.deliver?.length).map(contract => {
+                          if (!contract.terms.deliver) return <></>;
+
+                          return contract.terms.deliver.reduce<ReactElement[]>((acc, curr) => {
+                            if (curr.destinationSymbol !== ship.nav.waypointSymbol) {
+                              acc.push(<Dropdown.Item key={curr.destinationSymbol} onClick={() => { handleShipNav(ship, curr.destinationSymbol) }}>
+                                {curr.destinationSymbol}
+                              </Dropdown.Item>)
+                            }
+                            return acc;
+                          }, [])
+                        })};
                       </Dropdown.Menu>
                     </Dropdown>
                   </div>

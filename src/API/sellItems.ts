@@ -13,11 +13,13 @@ export default async function sellItems(shipSymbol: string, itemsToSell: { [key:
   try {
 
     filteredItemsToSell.forEach(async (item) => {
-      const result = await axiosClient.post(`/my/ships/${shipSymbol}/sell`, item);
-      logInDev(result);
+      await axiosClient.post(`/my/ships/${shipSymbol}/sell`, item);
     });
+
+    return { code: 201 }
 
   } catch (e: any) {
     logInDev(e);
+    return { code: 500 }
   }
 }
