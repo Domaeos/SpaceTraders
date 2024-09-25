@@ -32,6 +32,7 @@ export function ContractCard({ contract, setRefresh }: { contract: IContract, se
     const result = await fullfillContract(contractID);
     if (result.code === 200) {
       toast.success("Contract fulfilled!");
+      setRefresh(x => !x);
     } else {
       toast.error("Something went wrong");
     }

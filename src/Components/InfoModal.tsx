@@ -113,6 +113,7 @@ export default function InfoModal({ system, show, setShow, setRefresh }:
         if (result.code === 201) {
           toast.success("Items sold");
           setRefresh(x => !x);
+
           setShow(false);
         } else {
           handleError(result.code);
@@ -122,9 +123,10 @@ export default function InfoModal({ system, show, setShow, setRefresh }:
         result = await buyItems(system.shipSymbol, itemsToBuy);
         logInDev("Result of buying items:");
         logInDev(result);
-        if(result.code === 201) {
+        if (result.code === 201) {
           toast.success("Items bought");
           setShow(false);
+          setRefresh(x => !x);
 
         } else {
           handleError(result.code);

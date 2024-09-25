@@ -200,9 +200,8 @@ export default function Ships() {
         logInDev(`Amount to deliver for ${deliver.tradeSymbol}: ${amountToDeliver}`);
 
         await deliverItems(deliveryContract.id, { shipSymbol: ship.symbol, tradeSymbol: deliver.tradeSymbol, units: amountToDeliver });
-
+        setRefresh(refresh => !refresh);
       });
-      setRefresh(refresh => !refresh);
     }
 
     console.log(deliveryContract);
@@ -265,7 +264,7 @@ export default function Ships() {
 
 
             <Accordion.Body>
-              <h5>{ship.nav.status === "IN_TRANSIT" && (ship.nav.route && new Date(ship.nav.route.arrival).getTime() < time) ? `Navigating to` : `Location`} - {ship.nav.waypointSymbol} - {formatString(waypoints[ship.symbol].type)}</h5>
+              <h5>{ship.nav.status === "IN_TRANSIT" && (ship.nav.route && new Date(ship.nav.route.arrival).getTime() > time) ? `Navigating to` : `Location`} - {ship.nav.waypointSymbol} - {formatString(waypoints[ship.symbol].type)}</h5>
               <div className="ship-location-information">
                 {ship.nav.status !== "IN_TRANSIT" ||
                   (ship.nav.status === "IN_TRANSIT" && new Date(ship.nav!.route!.arrival).getTime() < time) ? (
